@@ -1,9 +1,11 @@
 install.packages("cghseg")
-install.packages("jointseg", repos="http://R-Forge.R-project.org")
+install.packages("jointSeg", repos="http://R-Forge.R-project.org")
 library("cghseg")
-library("jointseg")
+library("jointSeg")
 
 signal <- rnorm(1e3)
 maxBreakpoints <- 10
 
-cghseg:::segmeanCO(signal, maxBreakpoints) jointseg:::pruneByDP(signal, K=maxBreakpoints)
+classic = cghseg:::segmeanCO(signal, maxBreakpoints)
+pruned = jointSeg:::pruneByDP(as.matrix(signal,nrow = 1), K=maxBreakpoints)
+pruned$rse
