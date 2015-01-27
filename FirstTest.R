@@ -9,3 +9,5 @@ maxBreakpoints <- 10
 classic = cghseg:::segmeanCO(signal, maxBreakpoints)
 pruned = jointSeg:::pruneByDP(as.matrix(signal,nrow = 1), K=maxBreakpoints)
 pruned$rse
+
+fgnho
