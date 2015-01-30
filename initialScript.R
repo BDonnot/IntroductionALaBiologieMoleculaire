@@ -47,18 +47,22 @@ jointseg:::pruneByDP(signal, K=maxBreakpoints)
 
 ## load known real copy number regions
 affyDat <- loadCnRegionData(dataSet="GSE29172", tumorFraction=0.7)
-
 ## generate a synthetic CN profile
 
 K <- 10
 len <- 1e4
 sim <- getCopyNumberDataByResampling(len, K, regData=affyDat)
+sim$bkp
+
 datS <- sim$profile
 signal=datS$c
-Res=cghseg:::segmeanCO(signal, K)
+Res_1=cghseg:::segmeanCO(signal, K)
 sim$bkp
-Res$t.est[10,] 
-jointseg:::pruneByDP(signal,candCP =sim$bkp,K=K)
+Res_1$t.est[10,] 
+Res_2=doDynamicProgramming(signal,K=K)
+Res_2$dpseg$bkp[[10]]
+sum(Res_2$dpseg$rse)
+
 RES_RBS=jointSeg(signal,method="RBS", K=K)
 RES_RBS$dpBkpList[10]
 sim$bkp
@@ -83,5 +87,14 @@ resRBS$prof
 getTpFp(resRBS$bestBkp, sim$bkp, tol=5)
 plotSeg(datS, breakpoints=list(sim$bkp, resRBS$bestBkp))
 
+<<results=tex>>
+    xtable(t(rbind(c(1:11),Res_2$dpseg$rse)))
+@
+sim$dk
+signal
 
-
+if (F){
+install.packages("reshape2")
+install.packages("data.table",repos="http://R-Forge.R-project.org")
+}
+library(data.table)
