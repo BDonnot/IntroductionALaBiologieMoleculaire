@@ -43,11 +43,45 @@ jointseg:::pruneByDP(signal, K=maxBreakpoints)
 ##biocLite("affy")
 
 
-addressPit="C:\\Users\\Peter-Jack\\Downloads\\GSE17359_RAW\\GSM433918.cel"
-addressBenj=""
+ library("jointseg")
 
-library(affy) 
-affy.data = ReadAffy(filenames=addressPit) 
-mypm <- pm(affy.data) 
-mymm <- mm(affy.data) 
-myaffyids <- probeNames(affy.data) 
+## load known real copy number regions
+affyDat <- loadCnRegionData(dataSet="GSE29172", tumorFraction=0.7)
+
+## generate a synthetic CN profile
+
+K <- 10
+len <- 1e4
+sim <- getCopyNumberDataByResampling(len, K, regData=affyDat)
+datS <- sim$profile
+signal=datS$c
+Res=cghseg:::segmeanCO(signal, K)
+sim$bkp
+Res$t.est[10,] 
+jointseg:::pruneByDP(signal,candCP =sim$bkp,K=K)
+RES_RBS=jointSeg(signal,method="RBS", K=K)
+RES_RBS$dpBkpList[10]
+sim$bkp
+Res$t.est[10,] 
+par(mfrow=c(4,4))
+plotSeg(datS, sim$bkp)
+plotSeg(datS,Res$t.est[10,])
+
+
+affyDat <- loadCnRegionData(dataSet="GSE29172", tumorFraction=0.5)
+
+## generate a synthetic CN profile
+K <- 10
+len <- 1e4
+sim <- getCopyNumberDataByResampling(len, K, regData=affyDat)
+datS <- sim$profile
+
+## run binary segmentation (+ dynamic programming) resRBS <-
+resRBS <- PSSeg(data=datS, method="RBS", stat=c("c", "d"), K=2*K, profile=TRUE)
+resRBS$prof
+
+getTpFp(resRBS$bestBkp, sim$bkp, tol=5)
+plotSeg(datS, breakpoints=list(sim$bkp, resRBS$bestBkp))
+
+
+
