@@ -1,21 +1,30 @@
+install.packages("cghseg")
+source("http://bioconductor.org/biocLite.R")
+biocLite("DNAcopy")
+install.packages("jointseg",repos="http://R-Forge.R-project.org")
 library("cghseg")
-library("jointSeg")
+library("jointseg")
 library("rbenchmark")
-library("Segmentor3IsBack")
+# library("Segmentor3IsBack")
+
 
 set.seed(42)
-sizeEach = c(350,250,50,350)*1e4
+allSizes = c(10,100,200,300,500,1000)
+res = rep(0,length(allSizes))
+i = 1
+for (size in allSizes){
+sizeEach = c(350,250,50,350)*size
 sigma = .3
 gamma = rep(c(2,1,2,3), sizeEach)
 
 c = gamma + rnorm(length(gamma),0,sigma)
-# matC= as.matrix(c,nrow = 1)
+# matC= as.matrix(c,ncol = 1)
 maxBreakpoints = 3
-classic = cghseg:::segmeanCO(c, maxBreakpoints+1)
-pruned = jointSeg:::jointseg(matC, K=maxBreakpoints,flavor = "DP")
-c(pruned$dpBkpList[[maxBreakpoints]][1]
-  ,diff(c(pruned$dpBkpList[[maxBreakpoints]],sum(sizeEach)))) == sizeEach
-
+# classic = cghseg:::segmeanCO(c, maxBreakpoints+1)
+pruned = doDynamicProgramming(c, K=maxBreakpoints)
+res[i] = system.time(doDynamicProgramming(c, K=maxBreakpoints))["user.self"]
+i = i+1
+}
 # bestPruned = Segmentor(c,keep=T,model = 2,Kmax = maxBreakpoints+1)
 if(F){
   plot(c)
