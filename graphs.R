@@ -10,12 +10,12 @@ library("rbenchmark")
 
 
 set.seed(42)
+sigma = .3
 allSizes = c(10,100,200,300,500,1000,2000,5000,10000)
 resSize = rep(0,length(allSizes))
 i = 1
 for (size in allSizes){
   sizeEach = c(350,250,50,350)*size
-  sigma = .3
   gamma = rep(c(2,1,2,3), sizeEach)
   c = gamma + rnorm(length(gamma),0,sigma)
   maxBreakpoints = 3
@@ -33,7 +33,6 @@ abline(lm(resSize~allSizesT),col = "blue")
 allK = c(5,10,20,30,50,75,100)
 resK = rep(0,length(allK))
 sizeEach = c(350,250,50,350)*100
-sigma = .3
 i = 1
 for (K in allK){
     gamma = rep(rep(c(2,1,2,3),K/5), rep(round(sizeEach/(K/5),0),K/5) )
