@@ -1,7 +1,7 @@
 install.packages("cghseg")
 install.packages("jointSeg", repos="http://R-Forge.R-project.org")
 library("cghseg")
-library("jointSeg")
+library("jointseg")
 
 signal <- rnorm(1e3)
 maxBreakpoints <- 10
@@ -98,3 +98,37 @@ install.packages("reshape2")
 install.packages("data.table",repos="http://R-Forge.R-project.org")
 }
 library(data.table)
+library("cghseg")
+library("jointseg")
+
+## load known real copy number regions
+set.seed(42)
+affyDat <- loadCnRegionData(dataSet="GSE29172", tumorFraction=0.7)
+K <- 10
+len <- 1e4
+sim <- getCopyNumberDataByResampling(len, K, regData=affyDat)
+segMean = cghseg:::segmeanCO(sim$profile$c, K+1)
+jointSeg=doDynamicProgramming(sim$profile$c,K=K)
+sepM = segMean$t.est[K+1,]
+sepJ = jointSeg$bkp
+sepTh = sim$bkp
+mySim = data.table(c = sim$profile$c,
+                   clustTh = rep(1:11,c(sepTh[1],diff(c(sepTh,len)))),
+                   clustJ = rep(1:11,c(sepJ[1],diff(c(sepJ,len)))),
+                   clustM = rep(1:11,c(sepM[1],diff(sepM))))
+
+# mySim[,var(c)*.N,by = clustJ]
+# mySim[,var(c)*.N,by = clustM]
+# mySim[,var(c)*.N,by = clustTh]
+sum(mySim[,var(c)*.N,by = clustJ],na.rm = T) #there is sometimes only 1 point in a cluster, hence the na.rm
+sum(mySim[,var(c)*.N,by = clustM],na.rm = T)
+sum(mySim[,var(c)*.N,by = clustTh],na.rm = T)
+
+
+
+length(rep(1:11
+           ,c(sim$bkp[1]
+              ,diff(c(sim$bkp,len))))
+       )
+
+
