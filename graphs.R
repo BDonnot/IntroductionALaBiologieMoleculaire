@@ -1,7 +1,8 @@
-if(F){install.packages("cghseg")
+if(T){
+  install.packages("cghseg")
   source("http://bioconductor.org/biocLite.R")
   biocLite("DNAcopy")
-  install.packages("jointseg",repos="http://R-Forge.R-project.org")
+  install.packages("jointseg",repos="http://R-Forge.R-project.org",type = "source")
 }
 library("cghseg")
 library("jointseg")
@@ -13,6 +14,13 @@ set.seed(42)
 sigma = .3
 allSizes = c(10,100,200,300,500,1000,2000,5000,10000)
 resSize = rep(0,length(allSizes))
+size = 1000
+sizeEach = c(350,250,50,350)*size
+gamma = rep(c(2,1,2,3), sizeEach)
+c = gamma + rnorm(length(gamma),0,sigma)
+maxBreakpoints = 3
+pruned = doDynamicProgramming(c, K=maxBreakpoints)
+
 i = 1
 for (size in allSizes){
   sizeEach = c(350,250,50,350)*size
@@ -55,8 +63,8 @@ if(F){
                       ,c(classic$t.est[maxBreakpoints+1,1],diff(classic$t.est[maxBreakpoints+1,]))
   )
   colorPruned = rep(c("blue","red","darkgreen","black")
-                    ,c(pruned$dpBkpList[[maxBreakpoints]][1]
-                       ,diff(c(pruned$dpBkpList[[maxBreakpoints]],sum(sizeEach)))
+                    ,c(pruned$bkp[1]
+                       ,diff(c(pruned$bkp,sum(sizeEach)))
                     )
   )
   colorPrunedOpt = rep(c("blue","red","darkgreen","black")
@@ -65,7 +73,7 @@ if(F){
   
   plot(c,col = rep(c("blue","red","darkgreen","black"),sizeEach), main ="True value", pch = '.')
   plot(c,col = colorsclassic,main = "Calssic DP")
-  plot(c,col = colorPruned,main = "Pruned DP")
+  plot(c,col = colorPruned,main = "Pruned DP",pch = '.')
   plot(c,col = colorPrunedOpt,main = "Pruned DP opt")
 }
 
